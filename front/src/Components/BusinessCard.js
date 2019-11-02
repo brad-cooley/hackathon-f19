@@ -10,6 +10,7 @@ import Typography from "@material-ui/core/Typography";
 import { IconButton, Collapse, Popover, Grid } from "@material-ui/core";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import clsx from "clsx";
+import { sendCheckIn } from "./Main";
 
 const useStyles = makeStyles(theme => ({
   card: {
@@ -40,6 +41,7 @@ export default function BusinessCard(props) {
   const [anchorEl2, setAnchorEl2] = React.useState(null);
   const [checkedIn, checkIn] = React.useState(false);
   const { data } = props;
+  const { venue, checkins } = data;
   const openWith = ["Apple Maps", "Google Maps", "Uber", "Lyft", "Yelp"];
 
   const handleExpandClick = () => {
@@ -62,6 +64,7 @@ export default function BusinessCard(props) {
     if (!checkedIn) {
       checkIn(true);
       setAnchorEl2(event.currentTarget);
+      sendCheckIn(data.id);
     }
   };
 
@@ -73,30 +76,32 @@ export default function BusinessCard(props) {
 
   return (
     <Card className={classes.card}>
-      <CardActionArea>
-        <CardMedia
-          component="img"
-          alt={data.name}
-          height="140"
-          image="https://i.imgur.com/eOSai4B.png"
-          title={data.name}
-        />
-        <CardContent className={classes.cardContent}>
-          <Typography gutterBottom variant="h5" component="h2">
-            {data.name}
-          </Typography>
-          <Typography variant="body2" color="textSecondary">
-            {`Daily: ${data.checkInsToday}\tWeekly: ${data.checkInsThisWeek}`}
+      <CardMedia
+        component="img"
+        alt={data.name}
+        height="140"
+        image={data.cover_photo}
+        title={data.name}
+      />
+      <CardContent className={classes.cardContent}>
+        <Typography gutterBottom variant="h5" component="h2">
+          {data.name}
+        </Typography>
+        <Typography variant="body2" color="textSecondary">
+          {`Daily: ${
+            checkedIn ? data.checkInsToday + 1 : data.checkInsToday
+          }\tWeekly: ${
+            checkedIn ? data.checkInsThisWeek + 1 : data.checkInsThisWeek
+          }`}
+        </Typography>
+      </CardContent>
+      <Collapse in={expanded} timeout="auto" unmountOnExit>
+        <CardContent>
+          <Typography variant="body2" color="textSecondary" component="p">
+            {data.blurb}
           </Typography>
         </CardContent>
-        <Collapse in={expanded} timeout="auto" unmountOnExit>
-          <CardContent>
-            <Typography variant="body2" color="textSecondary" component="p">
-              {data.blurb}
-            </Typography>
-          </CardContent>
-        </Collapse>
-      </CardActionArea>
+      </Collapse>
       <CardActions>
         <Button
           size="small"

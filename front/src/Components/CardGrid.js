@@ -25,7 +25,7 @@ export default function CardGrid(props) {
       className={classes.hideOverflow}
     >
       {props.data.map(card => (
-        <Grid item key={card.location.latitude} xs={12} sm={6} md={4}>
+        <Grid item key={card.venue.id} xs={12} sm={6} md={4}>
           <BusinessCard data={card} />
         </Grid>
       ))}
