@@ -7,17 +7,9 @@ import CardContent from "@material-ui/core/CardContent";
 import CardMedia from "@material-ui/core/CardMedia";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
-import { IconButton, Collapse, Grid } from "@material-ui/core";
+import { IconButton, Collapse, Popover, Grid } from "@material-ui/core";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import clsx from "clsx";
-import ButtonGroup from "@material-ui/core/ButtonGroup";
-import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
-import ClickAwayListener from "@material-ui/core/ClickAwayListener";
-import Grow from "@material-ui/core/Grow";
-import Paper from "@material-ui/core/Paper";
-import Popper from "@material-ui/core/Popper";
-import MenuItem from "@material-ui/core/MenuItem";
-import MenuList from "@material-ui/core/MenuList";
 
 const useStyles = makeStyles(theme => ({
   card: {
@@ -41,39 +33,43 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const openWith = ["Apple Maps", "Google Maps", "Uber", "Lyft", "Yelp"];
-
 export default function BusinessCard(props) {
   const classes = useStyles();
   const [expanded, setExpanded] = React.useState(false);
-  const [open, setOpen] = React.useState(false);
-  const anchorRef = React.useRef(null);
-  const [selectedIndex, setSelectedIndex] = React.useState(0);
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [anchorEl2, setAnchorEl2] = React.useState(null);
+  const [checkedIn, checkIn] = React.useState(false);
   const { data } = props;
+  const openWith = ["Apple Maps", "Google Maps", "Uber", "Lyft", "Yelp"];
 
   const handleExpandClick = () => {
     setExpanded(!expanded);
   };
 
-  const handleClick = event => {
-    alert(`You clicked ${openWith[selectedIndex]}`);
+  const handlePopoverClick = event => {
+    setAnchorEl(event.currentTarget);
   };
 
-  const handleMenuItemClick = (event, index) => {
-    setSelectedIndex(index);
-    setOpen(false);
+  const handlePopoverClose = () => {
+    setAnchorEl(null);
   };
 
-  const handleToggle = () => {
-    setOpen(prevOpen => !prevOpen);
+  const handlePopoverClose2 = () => {
+    setAnchorEl2(null);
   };
 
-  const handleClose = event => {
-    if (anchorRef.current && anchorRef.current.contains(event.target)) {
-      return;
+  const handleCheckIn = event => {
+    if (!checkedIn) {
+      checkIn(true);
+      setAnchorEl2(event.currentTarget);
     }
-    setOpen(false);
   };
+
+  const open = Boolean(anchorEl);
+  const id = open ? "simple-popover" : undefined;
+
+  const open2 = Boolean(anchorEl2);
+  const id2 = open2 ? "simple-popover" : undefined;
 
   return (
     <Card className={classes.card}>
@@ -102,63 +98,70 @@ export default function BusinessCard(props) {
         </Collapse>
       </CardActionArea>
       <CardActions>
-        <Button size="small" variant="contained" color="primary">
+        <Button
+          size="small"
+          variant="contained"
+          color={checkedIn ? "default" : "primary"}
+          onClick={handleCheckIn}
+        >
           Check In
         </Button>
-        <Grid container direction="column" alignItems="center">
-          <Grid item xs={12}>
-            <ButtonGroup
-              variant="contained"
-              color="primary"
-              ref={anchorRef}
-              aria-label="split button"
-            >
-              <Button onClick={handleClick}>{openWith[selectedIndex]}</Button>
-              <Button
-                color="primary"
-                size="small"
-                aria-owns={open ? "menu-list-grow" : undefined}
-                aria-haspopup="true"
-                onClick={handleToggle}
-              >
-                <ArrowDropDownIcon />
-              </Button>
-            </ButtonGroup>
-            <Popper
-              open={open}
-              anchorEl={anchorRef.current}
-              transition
-              disablePortal
-            >
-              {({ TransitionProps, placement }) => (
-                <Grow
-                  {...TransitionProps}
-                  style={{
-                    transformOrigin:
-                      placement === "bottom" ? "center top" : "center bottom"
-                  }}
-                >
-                  <Paper id="menu-list-grow">
-                    <ClickAwayListener onClickAway={handleClose}>
-                      <MenuList>
-                        {openWith.map((option, index) => (
-                          <MenuItem
-                            key={option}
-                            disabled={index === 2}
-                            selected={index === selectedIndex}
-                            onClick={event => handleMenuItemClick(event, index)}
-                          >
-                            {option}
-                          </MenuItem>
-                        ))}
-                      </MenuList>
-                    </ClickAwayListener>
-                  </Paper>
-                </Grow>
-              )}
-            </Popper>
+        <Popover
+          id={id2}
+          open={open2}
+          anchorEl={anchorEl2}
+          onClose={handlePopoverClose2}
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "center"
+          }}
+          transformOrigin={{
+            vertical: "top",
+            horizontal: "center"
+          }}
+        >
+          <Typography className={classes.popoverPadding}>
+            Thanks for checking in!
+          </Typography>
+        </Popover>
+        <Button
+          size="small"
+          variant="contained"
+          color="primary"
+          aria-describedby={id}
+          onClick={handlePopoverClick}
+        >
+          Open With...
+        </Button>
+        <Popover
+          id={id}
+          open={open}
+          anchorEl={anchorEl}
+          onClose={handlePopoverClose}
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "center"
+          }}
+          transformOrigin={{
+            vertical: "top",
+            horizontal: "center"
+          }}
+        >
+          <Grid
+            container
+            direction="column"
+            justify="flex-start"
+            alignItems="center"
+          >
+            {openWith.map(str => (
+              <Grid item key={str}>
+                <Button color="primary" className={classes.popoverPadding}>
+                  {str}
+                </Button>
+              </Grid>
+            ))}
           </Grid>
-        </Grid>
+        </Popover>
         <IconButton
           className={clsx(classes.expand, {
             [classes.expandOpen]: expanded

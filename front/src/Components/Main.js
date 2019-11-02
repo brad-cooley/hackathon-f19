@@ -1,8 +1,9 @@
 import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
-import { Container, Typography } from "@material-ui/core";
+import { Container, Typography, CircularProgress } from "@material-ui/core";
 import CardGrid from "./CardGrid";
 import { cardTestData } from "../Util/TestData";
+import * as firebase from "firebase";
 
 const useStyles = makeStyles(theme => ({
   heroContent: {
@@ -28,10 +29,31 @@ firebase.analytics();
 
 var db = firebase.firestore();
 
+async function getData() {
+  var dataTemp = [];
+
+  await db
+    .collection("venues")
+    .get()
+    .then(res => {
+      res.forEach(r => {
+        console.log(r.data());
+        dataTemp.push(r.data());
+      });
+    });
+
+  return dataTemp;
+}
+
 export default function Main() {
   const classes = useStyles();
+  const [data, setData] = React.useState();
 
-  return (
+  if (data === undefined) {
+    setData(getData());
+  }
+
+  return data !== undefined ? (
     <React.Fragment>
       <div className={classes.heroContent}>
         <Container maxWidth="sm">
@@ -56,8 +78,10 @@ export default function Main() {
           </Typography>
         </Container>
       </div>
+      {console.log(data)}
       <CardGrid
-        data={cardTestData.sort((a, b) =>
+        data={cardTestData}
+        /*data.sort((a, b) =>
           a.checkInsToday < b.checkInsToday
             ? 1
             : a.checkInsToday === b.checkInsToday
@@ -65,8 +89,10 @@ export default function Main() {
               ? 1
               : -1
             : -1
-        )}
+        )*/
       />
     </React.Fragment>
+  ) : (
+    <CircularProgress />
   );
 }
