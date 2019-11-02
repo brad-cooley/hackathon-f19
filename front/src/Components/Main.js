@@ -9,6 +9,10 @@ const useStyles = makeStyles(theme => ({
   heroContent: {
     padding: theme.spacing(1, 0, 2),
     maxWidth: "100%"
+  },
+  load: {
+    align: "center",
+    paddingTop: 5
   }
 }));
 
@@ -29,31 +33,26 @@ firebase.analytics();
 
 var db = firebase.firestore();
 
-async function getData() {
-  var dataTemp = [];
-
-  await db
-    .collection("venues")
-    .get()
-    .then(res => {
-      res.forEach(r => {
-        console.log(r.data());
-        dataTemp.push(r.data());
-      });
-    });
-
-  return dataTemp;
-}
-
 export default function Main() {
   const classes = useStyles();
-  const [data, setData] = React.useState();
+  const [data, setData] = React.useState(null);
+  const [isLoading, setIsLoading] = React.useState(true);
 
-  if (data === undefined) {
-    setData(getData());
-  }
+  React.useEffect(() => {
+    db.collection("venues")
+      .get()
+      .then(res => {
+        let temp = [];
+        res.forEach(r => {
+          console.log(r.data());
+          temp.push(r.data());
+        });
+        setData(temp);
+        setIsLoading(false);
+      });
+  }, []);
 
-  return data !== undefined ? (
+  return !isLoading ? (
     <React.Fragment>
       <div className={classes.heroContent}>
         <Container maxWidth="sm">
@@ -80,7 +79,7 @@ export default function Main() {
       </div>
       {console.log(data)}
       <CardGrid
-        data={cardTestData}
+        data={data}
         /*data.sort((a, b) =>
           a.checkInsToday < b.checkInsToday
             ? 1
@@ -93,6 +92,6 @@ export default function Main() {
       />
     </React.Fragment>
   ) : (
-    <CircularProgress />
+    <CircularProgress className={classes.load} />
   );
 }
