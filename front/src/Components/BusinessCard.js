@@ -40,9 +40,30 @@ export default function BusinessCard(props) {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [anchorEl2, setAnchorEl2] = React.useState(null);
   const [checkedIn, checkIn] = React.useState(false);
-  const { data } = props;
-  const { venue, checkins } = data;
+  const { venue, checkins } = props;
   const openWith = ["Apple Maps", "Google Maps", "Uber", "Lyft", "Yelp"];
+
+  // eslint-disable-next-line no-undef
+  var lastTwelve = moment()
+    .subtract(12, "hours")
+    .toDate();
+
+  //eslint-disable-next-line no-undef
+  var lastWeek = moment()
+    .subtract(1, "week")
+    .toDate();
+
+  let checkInsThisWeek = 0;
+
+  let checkInsToday = 0;
+
+  React.useEffect(() => {
+    checkInsToday = checkins.filter(value => value.timestamp > lastTwelve)
+      .length;
+    checkInsThisWeek = checkins.filter(value => {
+      return value.timestamp > lastWeek;
+    }).length;
+  }, [checkins, venue]);
 
   const handleExpandClick = () => {
     setExpanded(!expanded);
@@ -68,30 +89,17 @@ export default function BusinessCard(props) {
     }
   };
 
+  const handleExternal = event => {
+    window.open(
+      `https://lmgtfy.com/?q=${venue.friendly_addr.replace(" ", "_")}&s=g`
+    );
+  };
+
   const open = Boolean(anchorEl);
   const id = open ? "simple-popover" : undefined;
 
   const open2 = Boolean(anchorEl2);
   const id2 = open2 ? "simple-popover" : undefined;
-
-  // eslint-disable-next-line no-undef
-  var lastTwelve = moment()
-    .subtract(12, "hours")
-    .toDate();
-
-  //eslint-disable-next-line no-undef
-  var lastWeek = moment()
-    .subtract(1, "week")
-    .toDate();
-
-  console.log(checkins);
-  const checkInsThisWeek = checkins.filter(value => {
-    return value.timestamp.toDate() > lastWeek.toDate();
-  }).length;
-
-  const checkInsToday = checkins.filter(
-    value => value.timestamp.toDate() > lastTwelve.toDate()
-  ).length;
 
   console.log(checkInsThisWeek);
   return (
@@ -108,8 +116,10 @@ export default function BusinessCard(props) {
           {venue.name}
         </Typography>
         <Typography variant="body2" color="textSecondary">
-          {`Daily: ${checkedIn ? checkInsToday + 1 : checkInsToday}\tWeekly: ${
-            checkedIn ? checkInsThisWeek + 1 : checkInsThisWeek
+          {`Daily: ${
+            checkedIn ? venue.checkins_day + 1 : venue.checkins_day
+          }\tWeekly: ${
+            checkedIn ? venue.checkins_week + 1 : venue.checkins_week
           }`}
         </Typography>
       </CardContent>
@@ -117,6 +127,9 @@ export default function BusinessCard(props) {
         <CardContent>
           <Typography variant="body2" color="textSecondary" component="p">
             {venue.blurb}
+          </Typography>
+          <Typography variant="body1" color="textSecondary" component="p">
+            {venue.friendly_addr}
           </Typography>
         </CardContent>
       </Collapse>
@@ -178,7 +191,11 @@ export default function BusinessCard(props) {
           >
             {openWith.map(str => (
               <Grid item key={str}>
-                <Button color="primary" className={classes.popoverPadding}>
+                <Button
+                  color="primary"
+                  className={classes.popoverPadding}
+                  onClick={handleExternal}
+                >
                   {str}
                 </Button>
               </Grid>

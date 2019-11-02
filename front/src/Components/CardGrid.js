@@ -26,7 +26,7 @@ export default function CardGrid(props) {
     >
       {props.data.map(card => (
         <Grid item key={card.venue.id} xs={12} sm={6} md={4}>
-          <BusinessCard data={card} />
+          <BusinessCard venue={card.venue} checkins={card.checkins} />
         </Grid>
       ))}
     </Grid>

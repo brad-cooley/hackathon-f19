@@ -77,42 +77,6 @@ function distance(lat1, lon1, lat2, lon2) {
   }
 }
 
-navigator.geolocation.getCurrentPosition(position => {
-  startupQuery(position.coords.latitude, position.coords.longitude);
-});
-
-function startupQuery(lat = 0, lon = 0) {
-  // eslint-disable-next-line no-undef
-  var startTime = moment()
-    .subtract(12, "hours")
-    .toDate();
-
-  let data = [];
-
-  db.collection("venues")
-    .get()
-    .then(venues => {
-      venues.forEach(venue => {
-        var ven_loc = venue.data().location;
-        var miles = distance(ven_loc.latitude, ven_loc.longitude, lat, lon);
-
-        if (miles < 15) {
-          var newVenueObj = { venue: venue.data(), checkins: [] };
-          newVenueObj.venue.id = venue.id;
-          db.collection(`venues/${venue.id}/checkins`)
-            .where("timestamp", ">", startTime)
-            .get()
-            .then(checkins => {
-              checkins.forEach(checkin => {
-                newVenueObj.checkins.push(checkin.data());
-              });
-            });
-        }
-        data.push(newVenueObj);
-      });
-    });
-}
-
 export function sendCheckIn(venue_id) {
   db.collection("venues")
     .doc(venue_id)
@@ -190,20 +154,14 @@ export default function Main() {
           </Typography>
         </Container>
       </div>
-      {console.log(data[0])}
       <CardGrid
-        data={data
-          .filter(value => Object.keys(value).length !== 0)
-          .sort((a, b) => (a.checkins.length < b.checkins.length ? 1 : -1))}
-        /*data.sort((a, b) =>
-          a.checkInsToday < b.checkInsToday
+        data={data.sort((a, b) =>
+          a.venue.checkins_day < b.venue.checkins_day
             ? 1
-            : a.checkInsToday === b.checkInsToday
-            ? a.checkInsThisWeek < b.checkInsThisWeek
-              ? 1
-              : -1
+            : a.venue.checkins_day === b.venue.checkins_day
+            ? 1
             : -1
-        )*/
+        )}
       />
     </React.Fragment>
   ) : (
