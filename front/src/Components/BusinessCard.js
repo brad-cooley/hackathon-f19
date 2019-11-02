@@ -89,6 +89,12 @@ export default function BusinessCard(props) {
     }
   };
 
+  const handleExternal = event => {
+    window.open(
+      `https://lmgtfy.com/?q=${venue.friendly_addr.replace(" ", "_")}&s=g`
+    );
+  };
+
   const open = Boolean(anchorEl);
   const id = open ? "simple-popover" : undefined;
 
