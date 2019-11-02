@@ -148,9 +148,8 @@ export default function Main() {
             color="textSecondary"
             paragraph
           >
-            This should be a blurb that says something like "Looking for
-            something quiet or something loud? We've got it below. Don't forget
-            to check in!" but sounds better.
+            Looking for something quiet or something loud? We've got it below. Don't forget
+            to check in!
           </Typography>
         </Container>
       </div>
