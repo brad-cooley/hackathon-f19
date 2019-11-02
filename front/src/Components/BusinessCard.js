@@ -10,6 +10,7 @@ import Typography from "@material-ui/core/Typography";
 import { IconButton, Collapse, Popover, Grid } from "@material-ui/core";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import clsx from "clsx";
+import { sendCheckIn } from "./Main";
 
 const useStyles = makeStyles(theme => ({
   card: {
@@ -62,6 +63,7 @@ export default function BusinessCard(props) {
     if (!checkedIn) {
       checkIn(true);
       setAnchorEl2(event.currentTarget);
+      sendCheckIn(data.id);
     }
   };
 
@@ -78,7 +80,7 @@ export default function BusinessCard(props) {
           component="img"
           alt={data.name}
           height="140"
-          image="https://i.imgur.com/eOSai4B.png"
+          image={data.cover_photo}
           title={data.name}
         />
         <CardContent className={classes.cardContent}>
@@ -86,7 +88,11 @@ export default function BusinessCard(props) {
             {data.name}
           </Typography>
           <Typography variant="body2" color="textSecondary">
-            {`Daily: ${data.checkInsToday}\tWeekly: ${data.checkInsThisWeek}`}
+            {`Daily: ${
+              checkedIn ? data.checkInsToday + 1 : data.checkInsToday
+            }\tWeekly: ${
+              checkedIn ? data.checkInsThisWeek + 1 : data.checkInsThisWeek
+            }`}
           </Typography>
         </CardContent>
         <Collapse in={expanded} timeout="auto" unmountOnExit>
