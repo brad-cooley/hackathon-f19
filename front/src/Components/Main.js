@@ -111,15 +111,40 @@ export default function Main() {
   const [isLoading, setIsLoading] = React.useState(true);
 
   React.useEffect(() => {
+    let lat = 0,
+      lon = 0;
+    navigator.geolocation.getCurrentPosition(position => {
+      lat = position.coords.latitude ? position.coords.latitude : 0;
+      lon = position.coords.longitude ? position.coords.longitude : 0;
+    });
+
+    // eslint-disable-next-line no-undef
+    var startTime = moment()
+      .subtract(12, "hours")
+      .toDate();
     db.collection("venues")
       .get()
-      .then(res => {
+      .then(venues => {
         let temp = [];
-        res.forEach(r => {
-          console.log(r.data());
-          let temp2 = r.data();
-          temp2.id = r.id;
-          temp.push(temp2);
+        venues.forEach(venue => {
+          var ven_loc = venue.data().location;
+          var miles = distance(ven_loc.latitude, ven_loc.longitude, lat, lon);
+
+          if (miles < 15) {
+            var newVenueObj = { venue: venue.data(), checkins: [] };
+            newVenueObj.venue.id = venue.id;
+            db.collection(`venues/${venue.id}/checkins`)
+              .where("timestamp", ">", startTime)
+              .get()
+              .then(checkins => {
+                checkins.forEach(checkin => {
+                  newVenueObj.checkins.push(checkin.data());
+                });
+              });
+            temp.push(newVenueObj);
+
+            console.log(newVenueObj);
+          }
         });
         setData(temp);
         setIsLoading(false);
@@ -128,6 +153,7 @@ export default function Main() {
 
   return !isLoading ? (
     <React.Fragment>
+      {console.log(data)}
       <div className={classes.heroContent}>
         <Container maxWidth="sm">
           <Typography
@@ -153,7 +179,9 @@ export default function Main() {
       </div>
       {console.log(data)}
       <CardGrid
-        data={data.filter(value => Object.keys(value).length !== 0)}
+        data={data
+          .filter(value => Object.keys(value).length !== 0)
+          .sort((a, b) => (a.checkins.length < b.checkins.length ? 1 : -1))}
         /*data.sort((a, b) =>
           a.checkInsToday < b.checkInsToday
             ? 1
