@@ -3,6 +3,29 @@ import { makeStyles } from "@material-ui/core/styles";
 import { Container, Typography, CircularProgress } from "@material-ui/core";
 import CardGrid from "./CardGrid";
 import * as firebase from "firebase";
+require('firebase/auth')
+
+var user_uid = undefined;
+let firebaseAppDefined = false
+
+setInterval(() => {
+  if (!firebaseAppDefined) loadApp()
+
+}, 100)
+
+function loadApp() {
+  if (firebase.app()) {
+    firebaseAppDefined = true
+
+    firebase.auth().signInAnonymously().catch((err) => {
+        console.error(err.code + ": " + err.message)
+      })
+    firebase.auth().onAuthStateChanged((user) => {
+        if(user) 
+          user_uid = user.uid
+      })
+  }
+}
 
 const useStyles = makeStyles(theme => ({
   heroContent: {
@@ -95,6 +118,7 @@ export function sendCheckIn(venue_id) {
     .doc(venue_id)
     .collection("checkins")
     .add({
+      user_uid: user_uid,
       timestamp: firebase.firestore.FieldValue.serverTimestamp()
     })
     .then(() => {
