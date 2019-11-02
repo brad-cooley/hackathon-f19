@@ -53,6 +53,7 @@ function startupQuery(lat = 0, lon = 0) {
 
             if (miles < 15) {
                 var newVenueObj = {venue: venue.data(), checkins: []}
+                newVenueObj.venue.id = venue.id
                 db.collection(`venues/${venue.id}/checkins`).where('timestamp', '>', startTime).get().then((checkins) => {
                     checkins.forEach((checkin) => {
                         newVenueObj.checkins.push(checkin.data())
@@ -63,5 +64,13 @@ function startupQuery(lat = 0, lon = 0) {
                 })
             }
         })
+    })
+}
+
+function checkIn(venue_id) {
+    db.collection('venues').doc(venue_id).collection('checkins').add({
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => {
+        console.log("Check-in Successful!")
     })
 }
