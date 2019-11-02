@@ -64,7 +64,7 @@ export default function BusinessCard(props) {
     if (!checkedIn) {
       checkIn(true);
       setAnchorEl2(event.currentTarget);
-      sendCheckIn(data.id);
+      sendCheckIn(venue.id);
     }
   };
 
@@ -74,31 +74,49 @@ export default function BusinessCard(props) {
   const open2 = Boolean(anchorEl2);
   const id2 = open2 ? "simple-popover" : undefined;
 
+  // eslint-disable-next-line no-undef
+  var lastTwelve = moment()
+    .subtract(12, "hours")
+    .toDate();
+
+  //eslint-disable-next-line no-undef
+  var lastWeek = moment()
+    .subtract(1, "week")
+    .toDate();
+
+  console.log(checkins);
+  const checkInsThisWeek = checkins.filter(value => {
+    return value.timestamp.toDate() > lastWeek.toDate();
+  }).length;
+
+  const checkInsToday = checkins.filter(
+    value => value.timestamp.toDate() > lastTwelve.toDate()
+  ).length;
+
+  console.log(checkInsThisWeek);
   return (
     <Card className={classes.card}>
       <CardMedia
         component="img"
-        alt={data.name}
+        alt={venue.name}
         height="140"
-        image={data.cover_photo}
-        title={data.name}
+        image={venue.cover_photo}
+        title={venue.name}
       />
       <CardContent className={classes.cardContent}>
         <Typography gutterBottom variant="h5" component="h2">
-          {data.name}
+          {venue.name}
         </Typography>
         <Typography variant="body2" color="textSecondary">
-          {`Daily: ${
-            checkedIn ? data.checkInsToday + 1 : data.checkInsToday
-          }\tWeekly: ${
-            checkedIn ? data.checkInsThisWeek + 1 : data.checkInsThisWeek
+          {`Daily: ${checkedIn ? checkInsToday + 1 : checkInsToday}\tWeekly: ${
+            checkedIn ? checkInsThisWeek + 1 : checkInsThisWeek
           }`}
         </Typography>
       </CardContent>
       <Collapse in={expanded} timeout="auto" unmountOnExit>
         <CardContent>
           <Typography variant="body2" color="textSecondary" component="p">
-            {data.blurb}
+            {venue.blurb}
           </Typography>
         </CardContent>
       </Collapse>

@@ -64,7 +64,6 @@ function startupQuery(lat = 0, lon = 0) {
     .subtract(12, "hours")
     .toDate();
 
-  console.log("Places with 15 miles of you");
   let data = [];
 
   db.collection("venues")
@@ -87,8 +86,6 @@ function startupQuery(lat = 0, lon = 0) {
             });
         }
         data.push(newVenueObj);
-
-        console.log(newVenueObj);
       });
     });
 }
@@ -118,10 +115,6 @@ export default function Main() {
       lon = position.coords.longitude ? position.coords.longitude : 0;
     });
 
-    // eslint-disable-next-line no-undef
-    var startTime = moment()
-      .subtract(12, "hours")
-      .toDate();
     db.collection("venues")
       .get()
       .then(venues => {
@@ -134,7 +127,6 @@ export default function Main() {
             var newVenueObj = { venue: venue.data(), checkins: [] };
             newVenueObj.venue.id = venue.id;
             db.collection(`venues/${venue.id}/checkins`)
-              .where("timestamp", ">", startTime)
               .get()
               .then(checkins => {
                 checkins.forEach(checkin => {
@@ -142,8 +134,6 @@ export default function Main() {
                 });
               });
             temp.push(newVenueObj);
-
-            console.log(newVenueObj);
           }
         });
         setData(temp);
@@ -153,7 +143,6 @@ export default function Main() {
 
   return !isLoading ? (
     <React.Fragment>
-      {console.log(data)}
       <div className={classes.heroContent}>
         <Container maxWidth="sm">
           <Typography
@@ -177,7 +166,7 @@ export default function Main() {
           </Typography>
         </Container>
       </div>
-      {console.log(data)}
+      {console.log(data[0])}
       <CardGrid
         data={data
           .filter(value => Object.keys(value).length !== 0)
