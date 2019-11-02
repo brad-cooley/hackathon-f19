@@ -84,11 +84,11 @@ function startupQuery(lat = 0, lon = 0) {
               checkins.forEach(checkin => {
                 newVenueObj.checkins.push(checkin.data());
               });
-              data.push(newVenueObj);
-
-              console.log(newVenueObj);
             });
         }
+        data.push(newVenueObj);
+
+        console.log(newVenueObj);
       });
     });
 }
